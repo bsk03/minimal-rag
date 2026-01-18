@@ -25,11 +25,19 @@ npm install
 
 ## Krok 3: Pobierz modele Ollama
 
+Ponieważ Ollama działa w Dockerze, użyj `docker exec`:
+
 ```bash
 # Model do embeddings (wektoryzacja tekstu)
-ollama pull all-minilm
+docker exec ollama ollama pull all-minilm
 
 # Model do chat (odpowiedzi)
+docker exec ollama ollama pull llama3.2:3b
+```
+
+**Alternatywnie**, jeśli masz zainstalowany Ollama CLI lokalnie, możesz użyć:
+```bash
+ollama pull all-minilm
 ollama pull llama3.2:3b
 ```
 
@@ -240,9 +248,9 @@ docker-compose up -d
 # 2. Zainstaluj zależności
 npm install
 
-# 3. Pobierz modele
-ollama pull all-minilm
-ollama pull llama3.2:3b
+# 3. Pobierz modele (przez Docker)
+docker exec ollama ollama pull all-minilm
+docker exec ollama ollama pull llama3.2:3b
 
 # 4. Przygotuj dane
 mkdir -p data
@@ -258,7 +266,7 @@ npm run ask "Twoje pytanie?"
 ## Rozwiązywanie problemów
 
 - **Ollama nie odpowiada**: Sprawdź czy Docker działa: `docker ps`
-- **Model nie znaleziony**: Uruchom `ollama pull nazwa_modelu`
+- **Model nie znaleziony**: Uruchom `docker exec ollama ollama pull nazwa_modelu`
 - **Qdrant nie działa**: Sprawdź logi: `docker logs qdrant`
 - **Błąd TypeScript**: Upewnij się że masz `ts-node` zainstalowane
 
