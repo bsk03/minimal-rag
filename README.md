@@ -1,93 +1,93 @@
-# Tutorial: Minimalne kroki do uruchomienia projektu RAG
+# Tutorial: Minimal Steps to Run RAG Project
 
-## Wymagania
+## Requirements
 
-- **Docker** i **Docker Compose** (do uruchomienia Ollama i Qdrant)
-- **Node.js** (wersja 18+)
-- **npm** lub **yarn**
+- **Docker** and **Docker Compose** (to run Ollama and Qdrant)
+- **Node.js** (version 18+)
+- **npm** or **yarn**
 
-## Krok 1: Uruchom serwisy (Docker)
+## Step 1: Start Services (Docker)
 
 ```bash
 docker-compose up -d
 ```
 
-To uruchomi:
+This will start:
 
-- **Ollama** na porcie `11434` (modele AI)
-- **Qdrant** na portach `6333` i `6334` (baza wektorowa)
+- **Ollama** on port `11434` (AI models)
+- **Qdrant** on ports `6333` and `6334` (vector database)
 
-## Krok 2: Zainstaluj zależności Node.js
+## Step 2: Install Node.js Dependencies
 
 ```bash
 npm install
 ```
 
-## Krok 3: Pobierz modele Ollama
+## Step 3: Download Ollama Models
 
-Ponieważ Ollama działa w Dockerze, użyj `docker exec`:
+Since Ollama runs in Docker, use `docker exec`:
 
 ```bash
-# Model do embeddings (wektoryzacja tekstu)
+# Model for embeddings (text vectorization)
 docker exec ollama ollama pull all-minilm
 
-# Model do chat (odpowiedzi)
+# Model for chat (responses)
 docker exec ollama ollama pull llama3.2:3b
 ```
 
-**Alternatywnie**, jeśli masz zainstalowany Ollama CLI lokalnie, możesz użyć:
+**Alternatively**, if you have Ollama CLI installed locally, you can use:
 ```bash
 ollama pull all-minilm
 ollama pull llama3.2:3b
 ```
 
-## Krok 4: Przygotuj dane
+## Step 4: Prepare Data
 
-Umieść plik z wiedzą w folderze `data/`:
+Place your knowledge file in the `data/` folder:
 
 ```bash
 mkdir -p data
-echo "Twoja wiedza tutaj..." > data/wiedza.txt
+echo "Your knowledge here..." > data/wiedza.txt
 ```
 
-## Krok 5: Zaindeksuj dokumenty
+## Step 5: Index Documents
 
 ```bash
 npm run ingest
 ```
 
-To:
+This will:
 
-- Wczyta plik `data/wiedza.txt`
-- Podzieli go na fragmenty
-- Wygeneruje embeddings
-- Zapisze do Qdrant
+- Load the file `data/wiedza.txt`
+- Split it into chunks
+- Generate embeddings
+- Save to Qdrant
 
-## Krok 6: Zadaj pytanie
+## Step 6: Ask a Question
 
 ```bash
-npm run ask "Twoje pytanie tutaj"
+npm run ask "Your question here"
 ```
 
-Lub bez argumentu (użyje domyślnego pytania):
+Or without arguments (will use default question):
 
 ```bash
 npm run ask
 ```
 
-## Struktura projektu
+## Project Structure
 
 ```
-projekt/
-├── data/              # Pliki z wiedzą (.txt)
+project/
+├── data/              # Knowledge files (.txt)
 ├── src/
-│   ├── ingests.ts     # Indeksowanie dokumentów
-│   └── ask.ts         # Zadawanie pytań
-├── docker-compose.yml # Konfiguracja Docker
-└── package.json       # Zależności Node.js
+│   ├── ingests.ts     # Document indexing
+│   └── ask.ts         # Asking questions
+├── docker-compose.yml # Docker configuration
+└── package.json       # Node.js dependencies
 ```
 
-## Minimalne pliki do stworzenia
+## Minimal Files to Create
 
 ### 1. `package.json`
 
@@ -145,7 +145,7 @@ services:
 }
 ```
 
-### 4. `src/ingests.ts` (minimalna wersja)
+### 4. `src/ingests.ts` (minimal version)
 
 ```typescript
 import { TextLoader } from '@langchain/classic/document_loaders/fs/text';
@@ -173,13 +173,13 @@ async function run() {
 		collectionName: 'my_documents',
 	});
 
-	console.log('✅ Gotowe!');
+	console.log('✅ Done!');
 }
 
 run();
 ```
 
-### 5. `src/ask.ts` (minimalna wersja)
+### 5. `src/ask.ts` (minimal version)
 
 ```typescript
 import { OllamaEmbeddings, ChatOllama } from '@langchain/ollama';
@@ -189,7 +189,7 @@ import { StringOutputParser } from '@langchain/core/output_parsers';
 import { RunnableSequence } from '@langchain/core/runnables';
 
 async function main() {
-	const question = process.argv.slice(2).join(' ') || 'Twoje pytanie?';
+	const question = process.argv.slice(2).join(' ') || 'Your question?';
 
 	const embeddings = new OllamaEmbeddings({
 		model: 'all-minilm',
@@ -211,11 +211,11 @@ async function main() {
 
 	const retriever = vectorStore.asRetriever({ k: 5 });
 
-	const template = `Odpowiedz na podstawie kontekstu:
+	const template = `Answer based on context:
 {context}
 
-Pytanie: {question}
-Odpowiedź:`;
+Question: {question}
+Answer:`;
 
 	const prompt = PromptTemplate.fromTemplate(template);
 
@@ -239,40 +239,40 @@ Odpowiedź:`;
 main();
 ```
 
-## Szybki start (wszystkie kroki)
+## Quick Start (All Steps)
 
 ```bash
-# 1. Uruchom Docker
+# 1. Start Docker
 docker-compose up -d
 
-# 2. Zainstaluj zależności
+# 2. Install dependencies
 npm install
 
-# 3. Pobierz modele (przez Docker)
+# 3. Download models (via Docker)
 docker exec ollama ollama pull all-minilm
 docker exec ollama ollama pull llama3.2:3b
 
-# 4. Przygotuj dane
+# 4. Prepare data
 mkdir -p data
-echo "Twoja wiedza..." > data/wiedza.txt
+echo "Your knowledge..." > data/wiedza.txt
 
-# 5. Zaindeksuj
+# 5. Index
 npm run ingest
 
-# 6. Zadaj pytanie
-npm run ask "Twoje pytanie?"
+# 6. Ask a question
+npm run ask "Your question?"
 ```
 
-## Rozwiązywanie problemów
+## Troubleshooting
 
-- **Ollama nie odpowiada**: Sprawdź czy Docker działa: `docker ps`
-- **Model nie znaleziony**: Uruchom `docker exec ollama ollama pull nazwa_modelu`
-- **Qdrant nie działa**: Sprawdź logi: `docker logs qdrant`
-- **Błąd TypeScript**: Upewnij się że masz `ts-node` zainstalowane
+- **Ollama not responding**: Check if Docker is running: `docker ps`
+- **Model not found**: Run `docker exec ollama ollama pull model_name`
+- **Qdrant not working**: Check logs: `docker logs qdrant`
+- **TypeScript error**: Make sure you have `ts-node` installed
 
-## Co dalej?
+## What's Next?
 
-- Zmień modele w `ingests.ts` i `ask.ts` (np. na większe modele)
-- Dodaj więcej plików do indeksowania
-- Dostosuj `chunkSize` i `chunkOverlap` w `ingests.ts`
-- Zmodyfikuj prompt w `ask.ts` dla lepszych odpowiedzi
+- Change models in `ingests.ts` and `ask.ts` (e.g., to larger models)
+- Add more files for indexing
+- Adjust `chunkSize` and `chunkOverlap` in `ingests.ts`
+- Modify the prompt in `ask.ts` for better answers
